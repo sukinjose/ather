@@ -1,0 +1,224 @@
+// IoT Temperature Controller with ESP8266, Blynk, OLED, and Fan Control
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <Preferences.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define BLYNK_TEMPLATE_ID "TMPL3-iMokJOc"
+#define BLYNK_DEVICE_NAME "iot temperature controller"
+#define BLYNK_AUTH_TOKEN "Jt4iz9bhrikwT6RXB6d4Xyb5LzK4UUlk"
+
+char ssid[] = "sasi";
+char pass[] = "12345678";
+char auth[] = BLYNK_AUTH_TOKEN;
+
+Preferences pref;
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+#define SCREEN_ADDRESS 0x3C
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+#define ONE_WIRE_BUS 13
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+WidgetLED FAN(V15);
+
+#define HEATING_PIN 14
+#define COOLING_PIN 12
+#define wifiLed 16
+#define relay1 D3
+#define relay2 D4
+#define fanPin D8
+
+#define VPIN_Text V0
+#define VPIN_Mode V1
+#define VPIN_currentTemp V2
+#define VPIN_setpoint V3
+#define VPIN_hysteresis V4
+#define VPIN_heaterbtn V5
+#define VPIN_coolerbtn V6
+
+float setpoint = 30;
+float hysteresis = 2;
+float currentTemp = 0;
+float temp = 0;
+int threshold = 30;
+
+bool heaterState = LOW;
+bool coolerState = LOW;
+bool modeState = LOW;
+int wifiFlag = 0;
+
+BlynkTimer timer;
+
+void controlFanSpeed(int fanSpeedPercent) {
+  analogWrite(fanPin, map(fanSpeedPercent, 0, 100, 0, 1023));
+}
+
+void readSensor() {
+  sensors.requestTemperatures();
+  currentTemp = sensors.getTempCByIndex(0);
+}
+
+void sendSensor() {
+  readSensor();
+  Blynk.virtualWrite(VPIN_currentTemp, currentTemp);
+  Blynk.virtualWrite(VPIN_Text, "IoT Temperature Controller");
+}
+
+void checkBlynkStatus() {
+  if (!Blynk.connected()) {
+    wifiFlag = 1;
+    digitalWrite(wifiLed, HIGH);
+  } else {
+    wifiFlag = 0;
+    digitalWrite(wifiLed, LOW);
+    Blynk.virtualWrite(VPIN_Text, "IoT Temperature Controller");
+  }
+}
+
+BLYNK_WRITE(VPIN_heaterbtn) {
+  heaterState = param.asInt();
+  digitalWrite(HEATING_PIN, !heaterState);
+}
+
+BLYNK_WRITE(VPIN_coolerbtn) {
+  coolerState = param.asInt();
+  digitalWrite(COOLING_PIN, !coolerState);
+}
+
+BLYNK_WRITE(VPIN_Mode) {
+  modeState = param.asInt();
+}
+
+BLYNK_WRITE(VPIN_setpoint) {
+  setpoint = param.asFloat();
+}
+
+BLYNK_WRITE(VPIN_hysteresis) {
+  hysteresis = param.asFloat();
+}
+
+BLYNK_WRITE(V7) {
+  bool value = param.asInt();
+  digitalWrite(relay1, value ? LOW : HIGH);
+}
+
+BLYNK_WRITE(V8) {
+  bool value = param.asInt();
+  digitalWrite(relay2, value ? LOW : HIGH);
+}
+
+BLYNK_CONNECTED() {
+  Blynk.virtualWrite(VPIN_Text, "IoT Temperature Controller");
+  Blynk.syncAll();
+}
+
+void displayData() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.println("IoT Temp. Controller");
+
+  display.setTextSize(2);
+  display.setCursor(0, 15);
+  display.print(currentTemp);
+  display.print((char)247);
+  display.println("C");
+
+  display.setTextSize(1);
+  display.setCursor(0, 40);
+  display.print("Set: ");
+  display.print(setpoint);
+  display.print((char)247);
+  display.print("C Hys: ");
+  display.println(hysteresis);
+
+  display.setCursor(0, 55);
+  display.print(modeState ? "Auto Mode" : "Manual Mode");
+
+  display.display();
+}
+
+void autoControl() {
+  if (modeState) {
+    if (currentTemp > setpoint + hysteresis) {
+      heaterState = LOW;
+      coolerState = HIGH;
+    } else if (currentTemp < setpoint - hysteresis) {
+      heaterState = HIGH;
+      coolerState = LOW;
+    } else {
+      heaterState = LOW;
+      coolerState = LOW;
+    }
+    digitalWrite(HEATING_PIN, !heaterState);
+    digitalWrite(COOLING_PIN, !coolerState);
+    Blynk.virtualWrite(VPIN_heaterbtn, heaterState);
+    Blynk.virtualWrite(VPIN_coolerbtn, coolerState);
+  }
+}
+
+void fanControl() {
+  if (currentTemp >= threshold) {
+    FAN.on();
+    int fanSpeed = map(currentTemp, threshold, 55, 10, 100);
+    fanSpeed = constrain(fanSpeed, 10, 100);
+    controlFanSpeed(fanSpeed);
+    Blynk.virtualWrite(V4, fanSpeed);
+    digitalWrite(fanPin, LOW);
+  } else {
+    FAN.off();
+    controlFanSpeed(0);
+    Blynk.virtualWrite(V4, 0);
+    digitalWrite(fanPin, HIGH);
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  pref.begin("Relay_State", false);
+
+  pinMode(HEATING_PIN, OUTPUT);
+  pinMode(COOLING_PIN, OUTPUT);
+  pinMode(relay1, OUTPUT);
+  pinMode(relay2, OUTPUT);
+  pinMode(wifiLed, OUTPUT);
+  pinMode(fanPin, OUTPUT);
+
+  digitalWrite(HEATING_PIN, !heaterState);
+  digitalWrite(COOLING_PIN, !coolerState);
+  digitalWrite(relay1, HIGH);
+  digitalWrite(relay2, HIGH);
+
+  sensors.begin();
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;);
+  }
+
+  display.display();
+  delay(1000);
+
+  Blynk.begin(auth, ssid, pass);
+
+  timer.setInterval(2000L, checkBlynkStatus);
+  timer.setInterval(1000L, sendSensor);
+  timer.setInterval(1500L, displayData);
+  timer.setInterval(2000L, autoControl);
+  timer.setInterval(2000L, fanControl);
+}
+
+void loop() {
+  Blynk.run();
+  timer.run();
+}
