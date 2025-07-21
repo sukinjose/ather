@@ -1,0 +1,144 @@
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+// Define LED pins for home automation
+#define light1 D5
+#define light2 D6
+#define light3 D7
+
+// Define Motor Driver pins (L298N)
+#define IN1 D1  // Left Motor Forward
+#define IN2 D2  // Left Motor Backward
+#define IN3 D3  // Right Motor Forward
+#define IN4 D4  // Right Motor Backward
+
+// Blynk authentication
+char auth[] = "JPomppabrRY0c64_amCnGQw2S0Dxd6NW";  // Replace with your Blynk token
+char ssid[] = "sasi";        // Replace with your WiFi name
+char pass[] = "123456789";   // Replace with your WiFi password
+
+// Control variables for car movement
+bool forward = 0;
+bool backward = 0;
+bool left = 0;
+bool right = 0;
+
+// Setup for Home Automation Lights
+BLYNK_WRITE(V4) {
+  bool value1 = param.asInt(); // Read value from the app for light1
+  if (value1 == 1) {
+    digitalWrite(light1, LOW); // Turn light1 ON
+  } else {
+    digitalWrite(light1, HIGH); // Turn light1 OFF
+  }
+}
+
+BLYNK_WRITE(V5) {
+  bool value2 = param.asInt(); // Read value from the app for light2
+  if (value2 == 1) {
+    digitalWrite(light2, LOW); // Turn light2 ON
+  } else {
+    digitalWrite(light2, HIGH); // Turn light2 OFF
+  }
+}
+
+BLYNK_WRITE(V6) {
+  bool value3 = param.asInt(); // Read value from the app for light3
+  if (value3 == 1) {
+    digitalWrite(light3, LOW); // Turn light3 ON
+  } else {
+    digitalWrite(light3, HIGH); // Turn light3 OFF
+  }
+}
+
+// Car movement controls using virtual pins
+BLYNK_WRITE(V0) {
+  forward = param.asInt();  // Read forward button state
+}
+BLYNK_WRITE(V1) {
+  backward = param.asInt();  // Read backward button state
+}
+BLYNK_WRITE(V2) {
+  left = param.asInt();  // Read left button state
+}
+BLYNK_WRITE(V3) {
+  right = param.asInt();  // Read right button state
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Setup for home automation lights
+  pinMode(light1, OUTPUT);
+  pinMode(light2, OUTPUT);
+  pinMode(light3, OUTPUT);
+  digitalWrite(light1, HIGH);  // Turn off initially
+  digitalWrite(light2, HIGH);
+  digitalWrite(light3, HIGH);
+
+  // Setup motor control pins for car
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Initialize Blynk
+  Blynk.begin(auth, ssid, pass);
+}
+
+// Car control function
+void controlCar() {
+  if (forward) {
+    moveForward();
+  } else if (backward) {
+    moveBackward();
+  } else if (left) {
+    turnLeft();
+  } else if (right) {
+    turnRight();
+  } else {
+    stopCar();
+  }
+}
+
+void loop() {
+  Blynk.run();  // Keep the Blynk connection alive
+  controlCar(); // Continuously check car control conditions
+}
+
+// Functions to control motor directions
+void moveForward() {
+  digitalWrite(IN1, HIGH);  // Left motor forward
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);  // Right motor forward
+  digitalWrite(IN4, LOW);
+}
+
+void moveBackward() {
+  digitalWrite(IN1, LOW);  // Left motor backward
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);  // Right motor backward
+  digitalWrite(IN4, HIGH);
+}
+
+void turnLeft() {
+  digitalWrite(IN1, LOW);  // Left motor stop
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH); // Right motor forward
+  digitalWrite(IN4, LOW);
+}
+
+void turnRight() {
+  digitalWrite(IN1, HIGH);  // Left motor forward
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);   // Right motor stop
+  digitalWrite(IN4, LOW);
+}
+
+void stopCar() {
+  digitalWrite(IN1, LOW);  // Stop both motors
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
