@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start Button</title>
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0; /* Light grey background */
+  }
+  .logo-container {
+    position: absolute;
+    top: 20px; /* Adjusts the distance from the top */
+    left: 50%;
+    transform: translateX(-50%); /* Centers the logo horizontally */
+  }
+
+  .logo-container img {
+    height: 100px; /* Adjust based on your logo's size */
+    width: auto;
+  }
+
+  .start-button {
+    padding: 20px 40px;
+    font-size: 2em; /* Large text size */
+    background-color:  #4CAF50; /* Blueish-green color */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+</style>
+</head>
+<body>
+<div class="logo-container">
+  <img src="../static/Medicar.png" alt="Logo"> <!-- Update src with your logo path -->
+</div>
+<form action="/start-cam" method="post">
+  <button class="start-button">Start</button>
+</form>
+</body>
+</html>

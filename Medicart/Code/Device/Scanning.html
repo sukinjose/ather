@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scanning Page</title>
+<script>
+    function checkCamCompletion() {
+        fetch('/check-cam')
+            .then(response => response.json())
+            .then(data => {
+                if (data.done) {
+                    window.location.href = '/otp';  // Redirect to otp.html
+                } else {
+                    setTimeout(checkCamCompletion, 1000);  // Check again after 1 second
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function startPolling() {
+        // Hide the initial message and show the scanning content
+        document.getElementById('initialMessage').style.display = 'none';
+        document.getElementById('scanningContent').style.display = 'flex';
+        // Start polling
+        checkCamCompletion();
+    }
+
+    // Start polling after a 12 seconds delay
+    window.onload = function() {
+        setTimeout(startPolling, 12000);  // Wait for 12 seconds before starting
+    };
+</script>
+
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  
+  .logo-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .logo-container img {
+    height: 100px;
+    width: auto;
+  }
+
+  .loader {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #3498db;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .messages {
+    display: none; /* Initially hidden */
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .message {
+    font-size: 20px;
+    margin-top: 20px;
+  }
+  
+  #initialMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+<div class="logo-container">
+  <img src="../static/Medicar.png" alt="Logo"> <!-- Update src with your logo path -->
+</div>
+
+<div id="initialMessage">
+  <div class="loader"></div>
+  <div class="message">Please wait...</div>
+</div>
+
+<div id="scanningContent" class="messages">
+  <div class="loader"></div>
+  <div class="message">Scanning...</div>
+  <div class="message">Please place the QR code</div>
+</div>
+
+</body>
+</html>

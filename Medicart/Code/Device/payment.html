@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Information</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .button-container {
+            text-align: center;
+        }
+        div {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .continue-button {
+            display: inline-block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #4CAF50; /* Green */
+            border: none;
+            border-radius: 5px;
+        }
+        .logo-container {
+            position: absolute;
+            top: 20px; /* Adjusts the distance from the top */
+            left: 50%;
+            transform: translateX(-50%); /* Centers the logo horizontally */
+        }
+
+        .logo-container img {
+            height: 100px; /* Adjust based on your logo's size */
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>Medicine Quantity Information</h2>
+    <table>
+        <tr>
+            <th>Medicine</th>
+            <th>Quantity</th>
+        </tr>
+        {% for item1, item2 in zip(list1, list2) %}
+        <tr>
+            <td>{{ item1 }}</td>
+            <td>{{ item2 }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div style="margin-top: 20px;">
+        <a href="/payment" class="continue-button">Continue</a>
+    </div>
+</body>
+</html>

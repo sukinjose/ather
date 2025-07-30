@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <title>Medicart.net</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin-top: 10px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        .input-row {
+            margin-bottom: 10px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        input[type=text], input[type=number] {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type=submit] {
+            padding: 10px 15px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background-color: #0056b3;
+        }	
+    </style>
+</head>
+<body>
+    <div style="background-color: #18a1a1; height: 100px; display: flex; align-items: center; justify-content: left; padding-left: 20px;">
+    	<img src="{{ url_for('static', filename='MediCar.png') }}" alt="MediCar Logo" style="height: 100px;"> <!-- Adjust the path and height as necessary -->
+    </div>
+    <h1>Generate Digital Prescription </h1>
+    <form action="/process_medicine_data" method="post">
+        <div class="input-row">
+            <label for="doctor_name">Doctor's Name:</label>
+            <input type="text" id="doctor_name" name="doctor_name" required>
+        </div>
+        <div class="input-row">
+            <label for="patient_name">Patient's Name:</label>
+            <input type="text" id="patient_name" name="patient_name" required>
+        </div>
+        <div class="input-row">
+            <label for="doctor_pin">Doctor's  PIN:</label>
+            <input type="number" id="doctor_pin" name="doctor_pin" required>
+        </div>
+        <div class="input-row">
+            <label for="phone_num">Phone Number:</label>
+            <input type="number" id="phone_num" name="phone_num" required>
+        </div>
+        {% for i in range(1, 5) %}
+        <div class="input-row">
+            <label for="medicine_{{i}}_name">Medicine {{i}}:</label>
+	    <input type="text" id="medicine_{{i}}_name" name="medicine_{{i}}_name" list="medicine-list">
+	    <datalist id="medicine-list">
+                <option value="Dolo - 650"></option>
+                <option value="Crocin advance 500mg"></option>
+                <option value="Calpol 500mg"></option>
+                <option value="Evion 600mg"></option>
+                <option value="Neurobion Forte"></option>
+                <option value="Cetirizine"></option>
+                <option value="Nocold plus 500mg"></option>
+            </datalist>
+            
+            <label for="medicine_{{i}}_quantity">Quantity:</label>
+            <input type="number" id="medicine_{{i}}_quantity" name="medicine_{{i}}_quantity" min="1">
+        </div>
+        {% endfor %}
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Prescription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin-top: 10px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        .input-row {
+            margin-bottom: 10px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        input[type=text], input[type=number] {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type=submit] {
+            padding: 10px 15px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background-color: #0056b3;
+        }
+	.back-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        .print-button {
+           padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .print-button:hover {
+            background-color: #45a049;
+        }
+
+        .prescription-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            background-color: #fff;
+            padding: 20px;
+            margin: auto;
+            width: 80%; /* Adjust width as needed */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            align-items: flex-start;
+        }
+
+        .prescription-details {
+            width: 70%; /* Adjust width as needed */
+        }
+
+        .qr-code-container {
+            width: 350px; /* Adjust size as needed */
+            height: auto;
+            text-align: center;
+        }
+
+        .qr-code {
+            width: 100%;
+            height: auto;
+        }
+       
+        
+
+        .medicine-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .medicine-table, .medicine-table th, .medicine-table td {
+            border: 1px solid #ddd;
+        }
+
+        .medicine-table th, .medicine-table td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        .medicine-table th {
+            background-color: #f2f2f2;
+        }
+        
+    </style>
+</head>
+<body>
+    <div style="background-color: #18a1a1; height: 100px; display: flex; align-items: center; justify-content: left; padding-left: 20px; margin-bottom: 20px;">
+    	<img src="{{ url_for('static', filename='MediCar.png') }}" alt="MediCar Logo" style="height: 100px;"> <!-- Adjust the path and height as necessary -->
+    </div>
+    <div class="prescription-container">
+        <div class="prescription-details">
+            <h1>Digital Prescription</h1>
+            <p><strong>Doctor's Name:</strong> {{ doctor_name }}</p>
+            <p><strong>Patient's Name:</strong> {{ patient_name }}</p>
+            <h1>Prescribed Medicines</h1>
+            <table class="medicine-table">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine, quantity in medicine_data %}
+                    <tr>
+                        <td>{{ medicine }}</td>
+                        <td>{{ quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <a href="/" class="back-button">Go Back</a>
+	    <button onclick="printPrescription()" class="print-button">Print</button>
+        </div>
+        <div class="qr-code-container">
+            <img src="{{ qr_data }}" alt="QR Code" class="qr-code">
+        </div>
+    </div>
+    <script>
+        function printPrescription() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

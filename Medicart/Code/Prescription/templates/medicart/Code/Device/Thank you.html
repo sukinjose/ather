@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You</title>
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+  }
+
+  .tick-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+  }
+
+  .tick {
+    color: white;
+    font-size: 60px;
+  }
+
+  .thank-you {
+    margin-top: 20px;
+    font-size: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="tick-container">
+  <span class="tick">&#10003;</span>
+</div>
+<div class="thank-you">Thank You</div>
+<script>
+    setTimeout(function() {
+        window.location.href = '/';
+    }, 5000); // Redirect after 5 seconds
+</script>
+</body>
+</html>
